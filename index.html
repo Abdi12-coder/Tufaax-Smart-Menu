@@ -3,160 +3,144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tufaax Smart Menu v5 - Location Enabled</title>
+    <title>Tufaax Smart POS - Fixed</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --tufaax-red: #ff4d4d; --dark-blue: #2b2d42; }
-        body { background: #fdfdfd; font-family: 'Inter', sans-serif; padding-top: 80px; padding-bottom: 120px; }
+        :root { --main-green: #28a745; --dark-bg: #f8f9fa; }
+        body { background: var(--dark-bg); font-family: 'Inter', sans-serif; height: 100vh; margin: 0; }
         
-        /* Nav & Categories */
-        .top-nav { position: fixed; top: 0; left: 0; right: 0; background: white; z-index: 2000; box-shadow: 0 2px 15px rgba(0,0,0,0.05); padding: 10px 0; }
-        .nav-scroller { display: flex; overflow-x: auto; padding: 5px 15px; gap: 15px; scrollbar-width: none; justify-content: center; }
-        .cat-item { text-align: center; text-decoration: none; color: #666; min-width: 75px; font-size: 0.85rem; }
-        .cat-item i { font-size: 1.4rem; display: block; margin-bottom: 4px; color: #999; }
-        .cat-item.active { color: var(--tufaax-red); font-weight: bold; }
-        .cat-item.active i { color: var(--tufaax-red); }
+        .main-container { display: flex; height: 100vh; flex-direction: row; }
+        
+        /* Menu Side */
+        .menu-side { flex: 7; overflow-y: auto; padding: 20px; background: white; }
+        .food-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
+        .food-card { border: 1px solid #eee; border-radius: 12px; text-align: center; cursor: pointer; transition: 0.3s; background: #fff; padding-bottom: 10px; }
+        .food-card img { width: 100%; height: 100px; object-fit: cover; border-radius: 12px 12px 0 0; }
+        
+        /* Cart Side */
+        .cart-side { flex: 3; background: white; border-left: 2px solid #eee; display: flex; flex-direction: column; padding: 20px; }
+        .cart-items { flex-grow: 1; overflow-y: auto; }
+        .cart-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f1f1f1; font-size: 0.9rem; }
+        
+        .btn-submit { background: var(--main-green); color: white; border: none; padding: 15px; border-radius: 10px; width: 100%; font-weight: 800; margin-top: 10px; }
 
-        /* Food Cards */
-        .section-title { font-weight: 800; font-size: 1.3rem; margin: 30px 0 15px; color: var(--dark-blue); text-transform: uppercase; border-left: 4px solid var(--tufaax-red); padding-left: 10px; }
-        .food-card { background: white; border-radius: 18px; border: 1px solid #f1f1f1; margin-bottom: 12px; display: flex; align-items: center; padding: 12px; transition: 0.2s; }
-        .food-img { width: 80px; height: 80px; border-radius: 14px; object-fit: cover; margin-right: 15px; }
-        .item-info { flex-grow: 1; }
-        .item-name { font-size: 0.95rem; font-weight: 700; color: #333; }
-        .item-price { color: var(--tufaax-red); font-weight: 800; }
-
-        /* Quantity Controls */
-        .qty-controls { display: flex; align-items: center; gap: 8px; background: #f8f9fa; border-radius: 10px; padding: 4px; }
-        .qty-btn { border: none; background: white; width: 30px; height: 30px; border-radius: 8px; color: var(--dark-blue); font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer; }
-        .qty-val { font-weight: 800; min-width: 20px; text-align: center; }
-
-        /* Footer Checkout */
-        .checkout-footer { position: fixed; bottom: 0; left: 0; right: 0; background: white; padding: 20px; border-radius: 25px 25px 0 0; box-shadow: 0 -10px 30px rgba(0,0,0,0.05); z-index: 3000; }
-        .btn-checkout { background: var(--tufaax-red); color: white; border: none; padding: 16px; border-radius: 16px; width: 100%; font-weight: 800; display: flex; justify-content: space-between; align-items: center; transition: 0.3s; }
-        .btn-checkout:active { transform: scale(0.98); }
-        .loc-badge { font-size: 0.7rem; background: #fff3f3; color: var(--tufaax-red); padding: 2px 8px; border-radius: 10px; margin-bottom: 5px; display: inline-block; }
+        @media (max-width: 992px) {
+            .main-container { flex-direction: column; }
+            .cart-side { height: auto; border-left: none; border-top: 4px solid #eee; }
+        }
     </style>
 </head>
 <body>
 
-    <nav class="top-nav">
-        <div class="nav-scroller">
-            <a href="#quraac" class="cat-item active"><i class="fas fa-coffee"></i>Quraac</a>
-            <a href="#qado" class="cat-item"><i class="fas fa-utensils"></i>Qado</a>
-            <a href="#casho" class="cat-item"><i class="fas fa-pizza-slice"></i>Casho</a>
-            <a href="#cabitaan" class="cat-item"><i class="fas fa-glass-martini-alt"></i>Cabitaan</a>
+<div class="main-container">
+    <div class="menu-side">
+        <h4 class="fw-bold mb-4"><i class="fas fa-utensils text-success"></i> Tufaax Menu</h4>
+        <div class="food-grid" id="menu-display"></div>
+    </div>
+
+    <div class="cart-side">
+        <h5 class="fw-bold mb-3"><i class="fas fa-shopping-cart"></i> DALABKAAGA</h5>
+        
+        <div class="mb-3">
+            <label class="small fw-bold">Magacaaga:</label>
+            <input type="text" id="cust-name" class="form-control form-control-sm" placeholder="Geli magacaaga...">
         </div>
-    </nav>
 
-    <div class="container">
-        <div id="menu-content"></div>
+        <div class="cart-items" id="cart-display">
+            <p class="text-muted text-center mt-4">Dambiishu waa maran tahay.</p>
+        </div>
+
+        <div class="summary mt-3">
+            <div class="p-3 bg-light rounded mb-2">
+                <div class="d-flex justify-content-between fw-bold h5 mb-0">
+                    <span>TOTAL:</span>
+                    <span id="total-val">$0.00</span>
+                </div>
+            </div>
+            <button class="btn-submit" onclick="handleCheckout()">
+                <i class="fab fa-whatsapp"></i> DIR DALABKA
+            </button>
+        </div>
     </div>
+</div>
 
-    <div class="checkout-footer text-center">
-        <div class="loc-badge"><i class="fas fa-map-marker-alt"></i> Location-kaaga waa la soo qabanayaa</div>
-        <button class="btn-checkout" onclick="handleOrder()">
-            <span><i class="fab fa-whatsapp me-2"></i>DALBO HADDA</span>
-            <span id="total-val">$0.00</span>
-        </button>
-    </div>
+<script>
+    const products = [
+        { name: "Bariis & Hilib", price: 5.00, img: "https://images.unsplash.com/photo-1512058560366-cd242d45869d?w=200" },
+        { name: "Baasto Suugo", price: 4.50, img: "https://images.unsplash.com/photo-1541544741938-0af808871cc0?w=200" },
+        { name: "Pizza Large", price: 8.00, img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=200" },
+        { name: "Mango Juice", price: 1.50, img: "https://images.unsplash.com/photo-1546173159-315724a31696?w=200" }
+    ];
 
-    <script>
-        const menu = {
-            quraac: [
-                { name: "Canjeero & Beer", price: 3.5, img: "https://images.unsplash.com/photo-1593584785033-9c7604d0863f?w=200" },
-                { name: "Muufo & Suugo", price: 2.5, img: "https://images.unsplash.com/photo-1541518763669-279f00ed0144?w=200" }
-            ],
-            qado: [
-                { name: "Bariis & Hilib Ari", price: 5.0, img: "https://images.unsplash.com/photo-1512058560366-cd242d45869d?w=200" },
-                { name: "Baasto Suugo Geel", price: 4.5, img: "https://images.unsplash.com/photo-1541544741938-0af808871cc0?w=200" }
-            ],
-            casho: [
-                { name: "Pizza Tufaax", price: 8.0, img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=200" },
-                { name: "Burger Combo", price: 5.5, img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=200" }
-            ],
-            cabitaan: [
-                { name: "Fresh Tufaax", price: 1.5, img: "https://images.unsplash.com/photo-1567306226416-28f0efdc88ce?w=200" },
-                { name: "Mango Juice", price: 1.5, img: "https://images.unsplash.com/photo-1546173159-315724a31696?w=200" }
-            ]
-        };
+    let cart = [];
 
-        let cart = {};
+    function renderMenu() {
+        const display = document.getElementById('menu-display');
+        display.innerHTML = products.map(p => `
+            <div class="food-card" onclick="addToCart('${p.name}', ${p.price})">
+                <img src="${p.img}">
+                <div class="fw-bold mt-2">${p.name}</div>
+                <div class="text-success">$${p.price.toFixed(2)}</div>
+            </div>
+        `).join('');
+    }
 
-        function renderMenu() {
-            const container = document.getElementById('menu-content');
-            let html = "";
-            for (let category in menu) {
-                html += `<h4 class="section-title" id="${category}">${category}</h4>`;
-                menu[category].forEach(item => {
-                    html += `
-                        <div class="food-card">
-                            <img src="${item.img}" class="food-img" alt="${item.name}">
-                            <div class="item-info">
-                                <div class="item-name">${item.name}</div>
-                                <div class="item-price">$${item.price.toFixed(2)}</div>
-                            </div>
-                            <div class="qty-controls">
-                                <button class="qty-btn" onclick="updateQty('${item.name}', ${item.price}, -1)">-</button>
-                                <span class="qty-val" id="qty-${item.name}">0</span>
-                                <button class="qty-btn" onclick="updateQty('${item.name}', ${item.price}, 1)">+</button>
-                            </div>
-                        </div>`;
-                });
-            }
-            container.innerHTML = html;
+    function addToCart(name, price) {
+        const item = cart.find(i => i.name === name);
+        if(item) { item.qty++; } else { cart.push({name, price, qty: 1}); }
+        renderCart();
+    }
+
+    function renderCart() {
+        const display = document.getElementById('cart-display');
+        if(cart.length === 0) {
+            display.innerHTML = '<p class="text-muted text-center mt-4">Dambiishu waa maran tahay.</p>';
+            document.getElementById('total-val').innerText = "$0.00";
+            return;
         }
+        display.innerHTML = cart.map(i => `
+            <div class="cart-item">
+                <span>${i.qty}x ${i.name}</span>
+                <span class="fw-bold">$${(i.qty * i.price).toFixed(2)}</span>
+            </div>
+        `).join('');
+        
+        const total = cart.reduce((sum, i) => sum + (i.qty * i.price), 0);
+        document.getElementById('total-val').innerText = `$${total.toFixed(2)}`;
+    }
 
-        function updateQty(name, price, delta) {
-            if (!cart[name]) cart[name] = { qty: 0, price: price };
-            cart[name].qty = Math.max(0, cart[name].qty + delta);
-            document.getElementById(`qty-${name}`).innerText = cart[name].qty;
-            
-            // Xisaabinta Total-ka
-            const total = Object.values(cart).reduce((sum, item) => sum + (item.qty * item.price), 0);
-            document.getElementById('total-val').innerText = `$${total.toFixed(2)}`;
+    function handleCheckout() {
+        const name = document.getElementById('cust-name').value;
+        const total = document.getElementById('total-val').innerText;
+        
+        if (cart.length === 0) return alert("Fadlan cunto dooro!");
+        if (!name) return alert("Fadlan geli magacaaga!");
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(pos => {
+                const loc = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
+                sendWhatsApp(name, total, loc);
+            }, () => {
+                sendWhatsApp(name, total, "Location lama bixin");
+            });
         }
+    }
 
-        // QAYBTA LOCATION-KA (Muhiim!)
-        function handleOrder() {
-            const total = document.getElementById('total-val').innerText;
-            if (total === "$0.00") return alert("Fadlan dooro cunto horta!");
+    function sendWhatsApp(name, total, location) {
+        let items = cart.map(i => `• ${i.qty}x ${i.name}`).join('%0A');
+        let phoneNumber = "252617054480"; // Hubi in lambarku sax yahay (kaliya nambar)
+        
+        let message = `*DALAB CUSUB: TUFAAX RESTAURANT*%0A%0A` +
+                      `👤 *Macmiilka:* ${name}%0A` +
+                      `🛒 *Dalabka:*%0A${items}%0A%0A` +
+                      `💰 *TOTAL:* ${total}%0A%0A` +
+                      `📍 *LOCATION:* ${location}`;
 
-            // Marka hore isku day in la helo GPS-ka
-            if (navigator.geolocation) {
-                alert("Fadlan guji 'Allow' si maqaayadda loogu soo diro halka aad joogto (Location).");
-                navigator.geolocation.getCurrentPosition(
-                    (pos) => {
-                        const googleMapsUrl = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
-                        sendToWhatsApp(googleMapsUrl);
-                    },
-                    (err) => {
-                        console.warn("Location-ka waa la diiday:", err);
-                        sendToWhatsApp("Location lama bixin (Macmiilka ayaa diiday)");
-                    },
-                    { enableHighAccuracy: true, timeout: 5000 }
-                );
-            } else {
-                sendToWhatsApp("Browser-kaagu ma taageero Location-ka.");
-            }
-        }
+        window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank');
+    }
 
-        function sendToWhatsApp(locationLink) {
-            let itemsText = "";
-            for (let name in cart) {
-                if (cart[name].qty > 0) {
-                    itemsText += `✅ ${cart[name].qty}x ${name}%0A`;
-                }
-            }
-
-            const total = document.getElementById('total-val').innerText;
-            const phoneNumber = "252617054480"; // Lambarkaaga WhatsApp-ka
-            const message = `*DALAB CUSUB: TUFAAX RESTAURANT*%0A%0A${itemsText}%0A*WADARTA: ${total}*%0A%0A📍 *GOOGLE MAPS LOCATION:*%0A${locationLink}`;
-            
-            window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank');
-        }
-
-        renderMenu();
-    </script>
+    renderMenu();
+</script>
 </body>
 </html>
