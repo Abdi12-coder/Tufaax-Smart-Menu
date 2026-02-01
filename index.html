@@ -3,85 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tufaax Smart POS - Fixed</title>
+    <title>Tufaax POS v6 - Final Fix</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root { --main-green: #28a745; --dark-bg: #f8f9fa; }
-        body { background: var(--dark-bg); font-family: 'Inter', sans-serif; height: 100vh; margin: 0; }
-        
-        .main-container { display: flex; height: 100vh; flex-direction: row; }
+        :root { --primary: #28a745; --bg: #f4f7f6; }
+        body { background: var(--bg); font-family: 'Segoe UI', sans-serif; height: 100vh; margin: 0; overflow: hidden; }
+        .main-container { display: flex; height: 100vh; }
         
         /* Menu Side */
-        .menu-side { flex: 7; overflow-y: auto; padding: 20px; background: white; }
-        .food-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
-        .food-card { border: 1px solid #eee; border-radius: 12px; text-align: center; cursor: pointer; transition: 0.3s; background: #fff; padding-bottom: 10px; }
-        .food-card img { width: 100%; height: 100px; object-fit: cover; border-radius: 12px 12px 0 0; }
+        .menu-side { flex: 7; overflow-y: auto; padding: 25px; background: white; }
+        .food-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 20px; }
+        .food-card { border: 1px solid #eee; border-radius: 15px; cursor: pointer; transition: 0.3s; background: #fff; overflow: hidden; position: relative; }
+        .food-card:hover { transform: translateY(-5px); border-color: var(--primary); }
+        .food-card img { width: 100%; height: 110px; object-fit: cover; }
+        .card-body { padding: 10px; text-align: center; }
         
         /* Cart Side */
-        .cart-side { flex: 3; background: white; border-left: 2px solid #eee; display: flex; flex-direction: column; padding: 20px; }
-        .cart-items { flex-grow: 1; overflow-y: auto; }
-        .cart-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f1f1f1; font-size: 0.9rem; }
+        .cart-side { flex: 3; background: #fff; border-left: 1px solid #ddd; display: flex; flex-direction: column; padding: 25px; box-shadow: -5px 0 15px rgba(0,0,0,0.02); }
+        .cart-items { flex-grow: 1; overflow-y: auto; margin: 15px 0; }
+        .cart-item { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dotted #ccc; font-weight: 500; }
         
-        .btn-submit { background: var(--main-green); color: white; border: none; padding: 15px; border-radius: 10px; width: 100%; font-weight: 800; margin-top: 10px; }
+        .total-section { background: #f8f9fa; padding: 20px; border-radius: 12px; margin-top: auto; }
+        .btn-order { background: var(--primary); color: white; border: none; padding: 18px; border-radius: 12px; width: 100%; font-weight: 800; font-size: 1.1rem; }
 
-        @media (max-width: 992px) {
-            .main-container { flex-direction: column; }
-            .cart-side { height: auto; border-left: none; border-top: 4px solid #eee; }
-        }
+        @media (max-width: 992px) { .main-container { flex-direction: column; overflow-y: auto; } .cart-side { border-left: none; border-top: 5px solid #eee; } }
     </style>
 </head>
 <body>
 
 <div class="main-container">
     <div class="menu-side">
-        <h4 class="fw-bold mb-4"><i class="fas fa-utensils text-success"></i> Tufaax Menu</h4>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="fw-bold">🍎 Tufaax Restaurant</h3>
+            <span class="badge bg-success">Open Now</span>
+        </div>
         <div class="food-grid" id="menu-display"></div>
     </div>
 
     <div class="cart-side">
-        <h5 class="fw-bold mb-3"><i class="fas fa-shopping-cart"></i> DALABKAAGA</h5>
+        <h5 class="fw-bold border-bottom pb-2"><i class="fas fa-shopping-basket me-2"></i>DALABKAAGA</h5>
         
-        <div class="mb-3">
-            <label class="small fw-bold">Magacaaga:</label>
-            <input type="text" id="cust-name" class="form-control form-control-sm" placeholder="Geli magacaaga...">
+        <div class="mt-3">
+            <label class="small fw-bold text-muted">MAGACA MACMIILKA *</label>
+            <input type="text" id="cust-name" class="form-control border-success" placeholder="Qor magacaaga halkan...">
         </div>
 
         <div class="cart-items" id="cart-display">
-            <p class="text-muted text-center mt-4">Dambiishu waa maran tahay.</p>
+            <div class="text-center mt-5 text-muted">Ma jiro wax dalab ah...</div>
         </div>
 
-        <div class="summary mt-3">
-            <div class="p-3 bg-light rounded mb-2">
-                <div class="d-flex justify-content-between fw-bold h5 mb-0">
-                    <span>TOTAL:</span>
-                    <span id="total-val">$0.00</span>
-                </div>
+        <div class="total-section">
+            <div class="d-flex justify-content-between mb-2">
+                <span>Subtotal:</span>
+                <span id="sub-total">$0.00</span>
             </div>
-            <button class="btn-submit" onclick="handleCheckout()">
-                <i class="fab fa-whatsapp"></i> DIR DALABKA
+            <div class="d-flex justify-content-between h4 fw-bold text-success mb-3">
+                <span>WADARTA:</span>
+                <span id="total-val">$0.00</span>
+            </div>
+            <button class="btn-order" onclick="processOrder()">
+                <i class="fab fa-whatsapp me-2"></i> DIR DALABKA
             </button>
         </div>
     </div>
 </div>
 
 <script>
-    const products = [
-        { name: "Bariis & Hilib", price: 5.00, img: "https://images.unsplash.com/photo-1512058560366-cd242d45869d?w=200" },
-        { name: "Baasto Suugo", price: 4.50, img: "https://images.unsplash.com/photo-1541544741938-0af808871cc0?w=200" },
-        { name: "Pizza Large", price: 8.00, img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=200" },
-        { name: "Mango Juice", price: 1.50, img: "https://images.unsplash.com/photo-1546173159-315724a31696?w=200" }
+    const menuData = [
+        { name: "Bariis & Hilib Ari", price: 5.50, img: "https://images.unsplash.com/photo-1512058560366-cd242d45869d?w=200" },
+        { name: "Baasto Suugo Geel", price: 4.00, img: "https://images.unsplash.com/photo-1541544741938-0af808871cc0?w=200" },
+        { name: "Pizza Mix", price: 7.50, img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=200" },
+        { name: "Salad Fresh", price: 2.50, img: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200" },
+        { name: "Mango Juice", price: 1.50, img: "https://images.unsplash.com/photo-1546173159-315724a31696?w=200" },
+        { name: "Shaah Cadeys", price: 0.50, img: "https://images.unsplash.com/photo-1594631252845-29fc4586db92?w=200" }
     ];
 
     let cart = [];
 
     function renderMenu() {
         const display = document.getElementById('menu-display');
-        display.innerHTML = products.map(p => `
+        display.innerHTML = menuData.map(p => `
             <div class="food-card" onclick="addToCart('${p.name}', ${p.price})">
                 <img src="${p.img}">
-                <div class="fw-bold mt-2">${p.name}</div>
-                <div class="text-success">$${p.price.toFixed(2)}</div>
+                <div class="card-body">
+                    <div class="fw-bold small">${p.name}</div>
+                    <div class="text-success fw-bold">$${p.price.toFixed(2)}</div>
+                </div>
             </div>
         `).join('');
     }
@@ -89,55 +97,57 @@
     function addToCart(name, price) {
         const item = cart.find(i => i.name === name);
         if(item) { item.qty++; } else { cart.push({name, price, qty: 1}); }
-        renderCart();
+        updateCartUI();
     }
 
-    function renderCart() {
+    function updateCartUI() {
         const display = document.getElementById('cart-display');
         if(cart.length === 0) {
-            display.innerHTML = '<p class="text-muted text-center mt-4">Dambiishu waa maran tahay.</p>';
+            display.innerHTML = '<div class="text-center mt-5 text-muted">Dambiishu waa maran tahay</div>';
             document.getElementById('total-val').innerText = "$0.00";
             return;
         }
         display.innerHTML = cart.map(i => `
             <div class="cart-item">
                 <span>${i.qty}x ${i.name}</span>
-                <span class="fw-bold">$${(i.qty * i.price).toFixed(2)}</span>
+                <span>$${(i.qty * i.price).toFixed(2)}</span>
             </div>
         `).join('');
         
         const total = cart.reduce((sum, i) => sum + (i.qty * i.price), 0);
+        document.getElementById('sub-total').innerText = `$${total.toFixed(2)}`;
         document.getElementById('total-val').innerText = `$${total.toFixed(2)}`;
     }
 
-    function handleCheckout() {
+    function processOrder() {
         const name = document.getElementById('cust-name').value;
-        const total = document.getElementById('total-val').innerText;
-        
-        if (cart.length === 0) return alert("Fadlan cunto dooro!");
-        if (!name) return alert("Fadlan geli magacaaga!");
+        if (!name) return alert("Fadlan qor magacaaga si aan kuu aqoonsanno!");
+        if (cart.length === 0) return alert("Dambiishaadu waa maran tahay!");
 
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(pos => {
                 const loc = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`;
-                sendWhatsApp(name, total, loc);
+                finishAndSend(name, loc);
             }, () => {
-                sendWhatsApp(name, total, "Location lama bixin");
+                finishAndSend(name, "Location lama bixin (GPS Off)");
             });
         }
     }
 
-    function sendWhatsApp(name, total, location) {
-        let items = cart.map(i => `• ${i.qty}x ${i.name}`).join('%0A');
-        let phoneNumber = "252617054480"; // Hubi in lambarku sax yahay (kaliya nambar)
-        
-        let message = `*DALAB CUSUB: TUFAAX RESTAURANT*%0A%0A` +
-                      `👤 *Macmiilka:* ${name}%0A` +
-                      `🛒 *Dalabka:*%0A${items}%0A%0A` +
-                      `💰 *TOTAL:* ${total}%0A%0A` +
-                      `📍 *LOCATION:* ${location}`;
+    function finishAndSend(customerName, locationLink) {
+        let orderList = cart.map(i => `✅ ${i.qty}x ${i.name}`).join('\n');
+        let totalAmount = document.getElementById('total-val').innerText;
+        let phoneNumber = "252617054480"; 
 
-        window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank');
+        let fariin = `*DALAB CUSUB: TUFAAX RESTAURANT*\n\n` +
+                     `👤 *Macmiilka:* ${customerName}\n` +
+                     `🛒 *Dalabka:* \n${orderList}\n\n` +
+                     `💰 *WARTA:* ${totalAmount}\n\n` +
+                     `📍 *Location-ka Macmiilka:* \n${locationLink}`;
+
+        // Habka ugu ammaan badan ee WhatsApp URL loo dhiso
+        let finalUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(fariin)}`;
+        window.open(finalUrl, '_blank');
     }
 
     renderMenu();
